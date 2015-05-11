@@ -1,11 +1,21 @@
+extern crate rustc_serialize;
+
 use std::cell::Cell;
 use std::collections::HashMap;
+use std::fs::File;
+use std::io::{Error, ErrorKind, Result};
+use std::io::prelude::*;
+use std::path::Path;
+use std::slice::Iter;
+use rustc_serialize::json::{decode, encode};
 
 pub type Id = u8;
 pub type Concentration = f32;
 pub type ChemicalMap = HashMap<Id, Chemical>;
 pub type DeltaMap = HashMap<Id, Concentration>;
 
+
+#[derive(RustcEncodable, RustcDecodable)]
 pub struct Chemical {
     id: Id,
     concentration: Concentration,
@@ -21,6 +31,8 @@ impl Chemical {
     }
 }
 
+
+#[derive(RustcEncodable, RustcDecodable)]
 pub struct Emitter {
     chemical: Id,
     gain: f32,
@@ -37,6 +49,7 @@ impl Emitter {
     }
 }
 
+#[derive(RustcEncodable, RustcDecodable)]
 pub enum ReactionType {
     /// A + B -> C + D
     Normal(Chemical, Chemical, Chemical, Chemical),
@@ -50,6 +63,7 @@ pub enum ReactionType {
     CatalyticBreakdown(Chemical, Chemical),
 }
 
+#[derive(RustcEncodable, RustcDecodable)]
 pub struct Reaction {
     kind: ReactionType,
     rate: u8,
@@ -126,6 +140,7 @@ impl Reaction {
     }
 }
 
+#[derive(RustcEncodable, RustcDecodable)]
 pub enum ReceptorType {
     /// Receptor triggers when concentration is below threshold.
     LowerBound,
@@ -133,6 +148,7 @@ pub enum ReceptorType {
     UpperBound,
 }
 
+#[derive(RustcEncodable, RustcDecodable)]
 pub struct Receptor {
     kind: ReceptorType,
     chemical: Id,
@@ -163,12 +179,14 @@ impl Receptor {
     }
 }
 
+#[derive(RustcEncodable, RustcDecodable)]
 pub enum Gene {
     Emitter(Emitter),
     Reaction(Reaction),
     Receptor(Receptor),
 }
 
+#[derive(RustcEncodable, RustcDecodable)]
 pub struct Genome {
     genes: Vec<Gene>
 }
@@ -176,5 +194,26 @@ pub struct Genome {
 impl Genome {
     pub fn new(genes: Vec<Gene>) -> Genome {
         Genome { genes: genes }
+    }
+
+    pub fn load(path: &Path) -> Result<Genome> {
+        let mut f = try!(File::open(path));
+        let mut data = String::new();
+        try!(f.read_to_string(&mut data));
+        decode(&data).map_err(|_|
+            Error::new(ErrorKind::InvalidInput, "Failed to decode genome.")
+        )
+    }
+
+    pub fn save(&self, path: &Path) -> Result<()> {
+        let mut f = try!(File::create(path));
+        try!(f.write_all(try!(encode(self).map_err(|_|
+            Error::new(ErrorKind::InvalidInput, "Failed to encode genome.")
+        )).as_bytes()));
+        f.flush()
+    }
+
+    pub fn iter(&self) -> Iter<Gene> {
+        self.genes.iter()
     }
 }
