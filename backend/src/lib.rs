@@ -202,8 +202,8 @@ impl Genome {
         Genome { genes: genes }
     }
 
-    pub fn load(path: &Path) -> Result<Genome> {
-        let mut f = try!(File::open(path));
+    pub fn load<T: AsRef<Path>>(path: T) -> Result<Genome> {
+        let mut f = try!(File::open(path.as_ref()));
         let mut data = String::new();
         try!(f.read_to_string(&mut data));
         decode(&data).map_err(|_|
@@ -211,8 +211,8 @@ impl Genome {
         )
     }
 
-    pub fn save(&self, path: &Path) -> Result<()> {
-        let mut f = try!(File::create(path));
+    pub fn save<T: AsRef<Path>>(&self, path: T) -> Result<()> {
+        let mut f = try!(File::create(path.as_ref()));
         try!(f.write_all(try!(encode(self).map_err(|_|
             Error::new(ErrorKind::InvalidInput, "Failed to encode genome.")
         )).as_bytes()));
