@@ -14,6 +14,18 @@ pub type Concentration = f32;
 pub type ChemicalMap = HashMap<Id, Chemical>;
 pub type DeltaMap = HashMap<Id, Concentration>;
 
+trait ChemMapExt {
+    fn apply(&mut self, deltas: &DeltaMap);
+}
+
+impl ChemMapExt for ChemicalMap {
+    fn apply(&mut self, deltas: &DeltaMap) {
+        for (id, diff) in deltas.iter() {
+            let val = self.entry(*id).or_insert(Chemical::new(*id));
+            val.concentration += *diff;
+        }
+    }
+}
 
 #[derive(RustcEncodable, RustcDecodable)]
 pub struct Chemical {
