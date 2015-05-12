@@ -73,7 +73,6 @@ impl Emitter {
     pub fn step(&self, deltas: &mut DeltaMap) {
         let val = deltas.entry(self.chemical).or_insert(0.0);
         *val += self.gain;
-        if *val > 1.0 { *val = 1.0 }
     }
 }
 
@@ -118,7 +117,6 @@ impl Reaction {
                     } else {
                         *val -= n * c.concentration
                     }
-                    if *val > 1.0 { *val = 1.0 } else if *val < 0.0 { *val = 0.0 }
                 };
                 update(a, false);
                 update(b, false);
@@ -135,7 +133,6 @@ impl Reaction {
                     } else {
                         *val -= n * c.concentration
                     }
-                    if *val > 1.0 { *val = 1.0 } else if *val < 0.0 { *val = 0.0 }
                 };                
                 update(a, false);
                 update(b, false);
@@ -145,7 +142,6 @@ impl Reaction {
                 let n = map[&a.id].concentration / a.concentration;
                 let val = deltas.entry(a.id).or_insert(0.0);
                 *val -= n * a.concentration;
-                if *val > 1.0 { *val = 1.0 } else if *val < 0.0 { *val = 0.0 }
             },
             ReactionType::Catalytic(ref a, ref b, ref c) => {
                 let n = (map[&a.id].concentration / a.concentration)
@@ -157,7 +153,6 @@ impl Reaction {
                     } else {
                         *val -= n * c.concentration
                     }
-                    if *val > 1.0 { *val = 1.0 } else if *val < 0.0 { *val = 0.0 }
                 };
                 update(b, false);
                 update(c, true);
@@ -167,7 +162,6 @@ impl Reaction {
                         .min(map[&b.id].concentration / b.concentration); 
                 let val = deltas.entry(b.id).or_insert(0.0);
                 *val -= n * b.concentration;
-                if *val > 1.0 { *val = 1.0 } else if *val < 0.0 { *val = 0.0 }
             },
         }
     }
