@@ -5,12 +5,12 @@ use backend::*;
 
 fn main() {
     let genome = Genome::new(vec![
-        Gene::Emitter(Emitter::new(0, 0.25)),
-        Gene::Reaction(Reaction::new(ReactionType::Decay(Chemical::with_concentration(0, 1.0)), 3)),
+        Gene::Emitter(Emitter::new(0, 0.125)),
+        Gene::Reaction(Reaction::new(ReactionType::Decay(Chemical::with_concentration(0, 0.25)), 4)),
         Gene::Receptor(Receptor::new(ReceptorType::LowerBound, 0, 1.0, 0.3)),
     ]);
     let mut map: ChemicalMap = HashMap::new();
-    simulate_genome(100, genome, &mut map);
+    simulate_genome(8, genome, &mut map);
 }
 
 fn simulate_genome(steps: u32, genome: Genome, map: &mut ChemicalMap) {
