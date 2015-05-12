@@ -14,6 +14,22 @@ pub type Concentration = f32;
 pub type ChemicalMap = HashMap<Id, Chemical>;
 pub type DeltaMap = HashMap<Id, Concentration>;
 
+pub trait ConcentrationExt {
+    fn clamp(&self, lo: Concentration, hi: Concentration) -> Concentration;
+}
+
+impl ConcentrationExt for Concentration {
+    fn clamp(&self, lo: Concentration, hi: Concentration) -> Concentration {
+        if *self > hi {
+            hi
+        } else if *self < lo {
+            lo
+        } else {
+            *self
+        }
+    }
+}
+
 pub trait ChemMapExt {
     fn apply(&mut self, deltas: &DeltaMap);
 }
@@ -23,13 +39,7 @@ impl ChemMapExt for ChemicalMap {
         for (id, diff) in deltas.iter() {
             let val = self.entry(*id).or_insert(Chemical::new(*id));
             val.concentration += *diff;
-            val.concentration = if val.concentration > 1.0 {
-                1.0
-            } else if val.concentration < 0.0 {
-                0.0
-            } else {
-                val.concentration 
-            };
+            val.concentration = val.concentration.clamp(0.0, 1.0);
         }
     }
 }
@@ -193,12 +203,12 @@ impl Receptor {
         let curr = prev + deltas.get(&self.chemical).map(|u| *u).unwrap_or(0.0);
         match self.kind {
             ReceptorType::LowerBound => if prev > self.threshold && curr < self.threshold {
-                Some(curr * self.gain)
+                Some((curr * self.gain).clamp(0.0, 1.0))
             } else {
                 None   
             },
             ReceptorType::UpperBound => if prev < self.threshold && curr > self.threshold {
-                Some(curr * self.gain)
+                Some((curr * self.gain).clamp(0.0, 1.0))
             } else {
                 None   
             },
