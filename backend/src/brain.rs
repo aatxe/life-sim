@@ -11,7 +11,7 @@ impl Neuron {
             weights: { 
                 let mut vec = Vec::with_capacity(input_count + 1);
                 let mut rng = thread_rng();
-                for _ in (0 .. input_count + 1) {
+                for _ in 0 .. input_count + 1 {
                     vec.push(rng.gen::<f32>().clamp(-1.0, 1.0));
                 }
                 vec
@@ -29,7 +29,7 @@ impl NeuronLayer {
         NeuronLayer {
             neurons: {
                 let mut vec = Vec::with_capacity(neuron_count);
-                for _ in (0 .. neuron_count) {
+                for _ in 0 .. neuron_count {
                     vec.push(Neuron::new(inputs_per_neuron));
                 }
                 vec
@@ -46,7 +46,23 @@ pub struct NeuralNet {
 impl NeuralNet {
     pub fn new(input_count: usize, output_count: usize, hidden_layer_count: usize, 
                neurons_per_hidden_layer: usize) -> NeuralNet {
-        unimplemented!()
+        NeuralNet {
+            input_count: input_count,
+            layers: {
+                let mut vec = Vec::with_capacity(hidden_layer_count + 1);
+                if hidden_layer_count > 0 {
+                    vec.push(NeuronLayer::new(neurons_per_hidden_layer, input_count));
+                    for _ in 0 .. hidden_layer_count - 1 {
+                        vec.push(NeuronLayer::new(neurons_per_hidden_layer, 
+                                                  neurons_per_hidden_layer))
+                    }
+                    vec.push(NeuronLayer::new(output_count, neurons_per_hidden_layer));
+                } else {
+                    vec.push(NeuronLayer::new(output_count, input_count));
+                }
+                vec
+            }
+        }
     }
 
     pub fn update(&self, inputs: Vec<f32>) -> Option<Vec<f32>> {
