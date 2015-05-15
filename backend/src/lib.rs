@@ -72,11 +72,11 @@ impl Chemical {
 #[derive(RustcEncodable, RustcDecodable)]
 pub struct Emitter {
     chemical: Id,
-    gain: f32,
+    gain: Concentration,
 }
 
 impl Emitter {
-    pub fn new(chemical: Id, gain: f32) -> Emitter {
+    pub fn new(chemical: Id, gain: Concentration) -> Emitter {
         Emitter { chemical: chemical, gain: gain }
     }
 
@@ -190,15 +190,15 @@ pub struct Receptor {
     kind: ReceptorType,
     chemical: Id,
     gain: f32,
-    threshold: f32,
+    threshold: Concentration,
 }
 
 impl Receptor {
-    pub fn new(kind: ReceptorType, chemical: Id, gain: f32, threshold: f32) -> Receptor {
+    pub fn new(kind: ReceptorType, chemical: Id, gain: f32, threshold: Concentration) -> Receptor {
         Receptor { kind: kind, chemical: chemical, gain: gain, threshold: threshold }
     }
 
-    pub fn step(&self, map: &mut ChemicalMap, deltas: &DeltaMap) -> Option<f32> {
+    pub fn step(&self, map: &mut ChemicalMap, deltas: &DeltaMap) -> Option<Concentration> {
         let prev = map.entry(self.chemical).or_insert(Chemical::new(self.chemical)).concentration;
         let curr = prev + deltas.get(&self.chemical).map(|u| *u).unwrap_or(0.0);
         match self.kind {

@@ -9,6 +9,7 @@ fn main() {
         Gene::Reaction(Reaction::new(ReactionType::Decay(Chemical::with_concentration(0, 0.25)), 4)),
         Gene::Receptor(Receptor::new(ReceptorType::LowerBound, 0, 1.0, 0.3)),
     ]);
+    genome.save("basic.json").unwrap();
     let mut map: ChemicalMap = HashMap::new();
     simulate_genome(8, genome, &mut map);
 }
