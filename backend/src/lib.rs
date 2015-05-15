@@ -1,5 +1,7 @@
+extern crate rand;
 extern crate rustc_serialize;
 
+pub mod brain;
 pub mod chem;
 pub mod genome;
 

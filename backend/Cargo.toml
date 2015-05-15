@@ -3,5 +3,8 @@ name = "backend"
 version = "0.1.0"
 authors = ["Aaron Weiss <aaronweiss74@gmail.com>"]
 
+[dependencies.rand]
+rand = "*"
+
 [dependencies.rustc-serialize]
 rustc-serialize = "*"
