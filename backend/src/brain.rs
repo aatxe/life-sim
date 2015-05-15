@@ -56,7 +56,7 @@ impl NeuralNet {
                 sigmoid(neuron.weights.iter()
                               .zip(acc.iter().chain([-1.0].iter()))
                               .map(|(w, v)| w * v)
-                              .fold(0f32, |acc, ref n| acc + n), 1.0)
+                              .fold(0.0, |acc, ref n| acc + n), 1.0)
             }).collect()
         }))
     }
