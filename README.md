@@ -7,3 +7,4 @@ An artificial life simulator in Rust. The endgoal is to make a modern, open sour
 These are some of the resources that are being used in development:
 * [Creatures paper](http://mrl.snu.ac.kr/courses/CourseSyntheticCharacter/grand96creatures.pdf)
 * [Willamette University's CS-449](http://www.willamette.edu/~gorr/classes/cs449/intro.html)
+* [Neural Networks in Plain English](http://www.ai-junkie.com/ann/evolved/nnt1.html)
