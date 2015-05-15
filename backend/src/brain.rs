@@ -18,6 +18,12 @@ impl Neuron {
             }
         }
     }
+
+    pub fn with_weights(weights: &[f32]) -> Neuron {
+        Neuron {
+            weights: weights.iter().map(|n| *n).collect()
+        }
+    }
 }
 
 struct NeuronLayer {
@@ -30,7 +36,20 @@ impl NeuronLayer {
             neurons: {
                 let mut vec = Vec::with_capacity(neuron_count);
                 for _ in 0 .. neuron_count {
-                    vec.push(Neuron::new(inputs_per_neuron));
+                    vec.push(Neuron::new(inputs_per_neuron))
+                }
+                vec
+            }
+        }
+    }
+
+    pub fn with_weights(neuron_count: usize, weights: &[f32]) -> NeuronLayer {
+        NeuronLayer {
+            neurons: {
+                let mut vec = Vec::with_capacity(neuron_count);
+                let stride = weights.len() / neuron_count;
+                for c in 0 .. neuron_count {
+                    vec.push(Neuron::with_weights(&weights[c * stride .. (c + 1) * stride]))
                 }
                 vec
             }
@@ -56,13 +75,39 @@ impl NeuralNet {
                         vec.push(NeuronLayer::new(neurons_per_hidden_layer, 
                                                   neurons_per_hidden_layer))
                     }
-                    vec.push(NeuronLayer::new(output_count, neurons_per_hidden_layer));
+                    vec.push(NeuronLayer::new(output_count, neurons_per_hidden_layer))
                 } else {
-                    vec.push(NeuronLayer::new(output_count, input_count));
+                    vec.push(NeuronLayer::new(output_count, input_count))
                 }
                 vec
             }
         }
+    }
+
+    pub fn with_weights(input_count: usize, output_count: usize, hidden_layer_count: usize,
+                        neurons_per_hidden_layer: usize, weights: &[f32]) -> Option<NeuralNet> {
+        if weights.len() != 0 /* gotta figure this expected size out... */ { return None }
+        Some(NeuralNet {
+            input_count: input_count,
+            layers: {
+                let mut vec = Vec::with_capacity(hidden_layer_count + 1);
+                if hidden_layer_count > 0 {
+                    let init = neurons_per_hidden_layer * input_count;
+                    vec.push(NeuronLayer::with_weights(neurons_per_hidden_layer, 
+                                                       &weights[0..init]));
+                    let stride = neurons_per_hidden_layer * neurons_per_hidden_layer;
+                    for c in 0 .. hidden_layer_count - 1 {
+                        vec.push(NeuronLayer::with_weights(neurons_per_hidden_layer,
+                                 &weights[init + c * stride .. init + (c + 1) * stride]))
+                    }
+                    vec.push(NeuronLayer::with_weights(output_count, 
+                             &weights[init + hidden_layer_count * stride..]))
+                } else {
+                    vec.push(NeuronLayer::with_weights(output_count, weights))
+                }
+                vec
+            }
+        })
     }
 
     pub fn get_weights(&self) -> Vec<f32> {
