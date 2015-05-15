@@ -65,6 +65,18 @@ impl NeuralNet {
         }
     }
 
+    pub fn get_weights(&self) -> Vec<f32> {
+        let mut ret = Vec::new();
+        for layer in self.layers.iter() {
+            for neuron in layer.neurons.iter() {
+                for weight in neuron.weights.iter() {
+                    ret.push(*weight);
+                }
+            }
+        }
+        ret
+    }
+
     pub fn update(&self, inputs: Vec<f32>) -> Option<Vec<f32>> {
         if inputs.len() != self.input_count { return None }
         Some(self.layers.iter().fold(inputs, |acc, ref layer| {
