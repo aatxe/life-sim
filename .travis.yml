@@ -1,0 +1,12 @@
+language: rust
+script:
+  - cd backend
+  - cargo test --verbose
+notifications:
+  email: false
+  irc:
+    channels:
+      - "irc.fyrechat.net#vana-commits"
+    template:
+      - "%{repository_slug}/%{branch} (%{commit} - %{author}): %{message}"
+    skip_join: true
