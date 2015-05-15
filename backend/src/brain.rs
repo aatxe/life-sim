@@ -63,6 +63,5 @@ impl NeuralNet {
 }
 
 fn sigmoid(a: f32, p: f32) -> f32 {
-    use std::f32::consts::E;
-    1.0 / (1.0 + E.powf(-a / p))
+    1.0 / (1.0 + (-a / p).exp())
 }
