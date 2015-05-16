@@ -89,9 +89,10 @@ impl NeuralNet {
 
     pub fn with_weights(input_count: usize, output_count: usize, hidden_layer_count: usize,
                         neurons_per_hidden_layer: usize, weights: &[f32]) -> Option<NeuralNet> {
-        let init = neurons_per_hidden_layer * (input_count + 1);
-        let stride = neurons_per_hidden_layer * (neurons_per_hidden_layer + 1);
-        let fin = output_count * (neurons_per_hidden_layer + 1);
+        // There's one additional weight per neuron because of the bias!
+        let init = neurons_per_hidden_layer * (input_count + 1); // neurons * weights
+        let stride = neurons_per_hidden_layer * (neurons_per_hidden_layer + 1); // neurons * weights
+        let fin = output_count * (neurons_per_hidden_layer + 1); // neurons * weights
         if weights.len() != init + stride * (hidden_layer_count - 1) + fin { return None }
         Some(NeuralNet {
             input_count: input_count,
