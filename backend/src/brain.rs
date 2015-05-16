@@ -89,16 +89,17 @@ impl NeuralNet {
 
     pub fn with_weights(input_count: usize, output_count: usize, hidden_layer_count: usize,
                         neurons_per_hidden_layer: usize, weights: &[f32]) -> Option<NeuralNet> {
-        if weights.len() != 0 /* gotta figure this expected size out... */ { return None }
+        let init = neurons_per_hidden_layer * (input_count + 1);
+        let stride = neurons_per_hidden_layer * (neurons_per_hidden_layer + 1);
+        let fin = output_count * (neurons_per_hidden_layer + 1);
+        if weights.len() != init + stride * (hidden_layer_count - 1) + fin { return None }
         Some(NeuralNet {
             input_count: input_count,
             layers: {
                 let mut vec = Vec::with_capacity(hidden_layer_count + 1);
                 if hidden_layer_count > 0 {
-                    let init = neurons_per_hidden_layer * (input_count + 1);
                     vec.push(NeuronLayer::with_weights(neurons_per_hidden_layer,
                                                        &weights[0..init]));
-                    let stride = neurons_per_hidden_layer * (neurons_per_hidden_layer + 1);
                     for c in 0 .. hidden_layer_count - 1 {
                         vec.push(NeuronLayer::with_weights(neurons_per_hidden_layer,
                             &weights[init + stride * c .. init + stride * (c + 1)]
