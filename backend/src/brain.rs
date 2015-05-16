@@ -143,5 +143,5 @@ impl NeuralNet {
 }
 
 fn sigmoid(a: f32, p: f32) -> f32 {
-    1.0 / (1.0 + (-a / p).exp())
+    (1.0 + (-a / p).exp()).recip()
 }
