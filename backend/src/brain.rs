@@ -1,6 +1,7 @@
 use chem::ConcentrationExt;
 use rand::{Rng, thread_rng};
 
+#[derive(Debug, PartialEq)]
 struct Neuron {
     weights: Vec<f32>,
 }
@@ -26,6 +27,7 @@ impl Neuron {
     }
 }
 
+#[derive(Debug, PartialEq)]
 struct NeuronLayer {
     neurons: Vec<Neuron>,
 }
@@ -57,6 +59,7 @@ impl NeuronLayer {
     }
 }
 
+#[derive(Debug, PartialEq)]
 pub struct NeuralNet {
     input_count: usize,
     layers: Vec<NeuronLayer>,
@@ -92,16 +95,18 @@ impl NeuralNet {
             layers: {
                 let mut vec = Vec::with_capacity(hidden_layer_count + 1);
                 if hidden_layer_count > 0 {
-                    let init = neurons_per_hidden_layer * input_count;
-                    vec.push(NeuronLayer::with_weights(neurons_per_hidden_layer, 
+                    let init = neurons_per_hidden_layer * (input_count + 1);
+                    vec.push(NeuronLayer::with_weights(neurons_per_hidden_layer,
                                                        &weights[0..init]));
-                    let stride = neurons_per_hidden_layer * neurons_per_hidden_layer;
+                    let stride = neurons_per_hidden_layer * (neurons_per_hidden_layer + 1);
                     for c in 0 .. hidden_layer_count - 1 {
                         vec.push(NeuronLayer::with_weights(neurons_per_hidden_layer,
-                                 &weights[init + c * stride .. init + (c + 1) * stride]))
+                            &weights[init + stride * c .. init + stride * (c + 1)]
+                        ));
                     }
-                    vec.push(NeuronLayer::with_weights(output_count, 
-                             &weights[init + hidden_layer_count * stride..]))
+                    vec.push(NeuronLayer::with_weights(output_count,
+                        &weights[init + stride * (hidden_layer_count - 1) ..]
+                    ));
                 } else {
                     vec.push(NeuronLayer::with_weights(output_count, weights))
                 }
