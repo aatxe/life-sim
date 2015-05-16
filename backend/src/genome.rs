@@ -11,6 +11,7 @@ pub enum Gene {
     Emitter(Emitter),
     Reaction(Reaction),
     Receptor(Receptor),
+    Brain(usize, usize, usize, usize, Vec<f32>),
 }
 
 #[derive(RustcEncodable, RustcDecodable)]
