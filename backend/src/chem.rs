@@ -1,5 +1,6 @@
 use std::cell::Cell;
 use std::collections::HashMap;
+use rand::{Rand, Rng};
 
 pub type Id = u8;
 pub type Concentration = f32;
@@ -36,6 +37,7 @@ impl ChemMapExt for ChemicalMap {
     }
 }
 
+#[derive_Rand]
 #[derive(RustcEncodable, RustcDecodable)]
 pub struct Chemical {
     id: Id,
@@ -60,7 +62,7 @@ impl Chemical {
     }
 }
 
-
+#[derive_Rand]
 #[derive(RustcEncodable, RustcDecodable)]
 pub struct Emitter {
     chemical: Id,
@@ -78,6 +80,7 @@ impl Emitter {
     }
 }
 
+#[derive_Rand]
 #[derive(RustcEncodable, RustcDecodable)]
 pub enum ReactionType {
     /// A + B -> C + D
@@ -97,6 +100,12 @@ pub struct Reaction {
     kind: ReactionType,
     rate: u8,
     tick: Cell<u8>,
+}
+
+impl Rand for Reaction {
+    fn rand<R: Rng>(rng: &mut R) -> Reaction {
+        Reaction { kind: rng.gen(), rate: rng.gen(), tick: Cell::new(0) }
+    }
 }
 
 impl Reaction {
@@ -169,6 +178,7 @@ impl Reaction {
     }
 }
 
+#[derive_Rand]
 #[derive(RustcEncodable, RustcDecodable)]
 pub enum ReceptorType {
     /// Receptor triggers when concentration is below threshold.
@@ -177,6 +187,7 @@ pub enum ReceptorType {
     UpperBound,
 }
 
+#[derive_Rand]
 #[derive(RustcEncodable, RustcDecodable)]
 pub struct Receptor {
     kind: ReceptorType,

@@ -4,6 +4,7 @@ use std::io::prelude::*;
 use std::path::Path;
 use std::slice::Iter;
 use chem::{Emitter, Reaction, Receptor};
+use rand::{Rand, Rng};
 use rustc_serialize::json::{decode, encode};
 
 #[derive(RustcEncodable, RustcDecodable)]
@@ -12,6 +13,16 @@ pub enum Gene {
     Reaction(Reaction),
     Receptor(Receptor),
     Brain(usize, usize, Vec<f32>),
+}
+
+impl Rand for Gene {
+    fn rand<R: Rng>(rng: &mut R) -> Gene {
+        match rng.gen_range(0, 3) {
+            0 => Gene::Emitter(rng.gen()),
+            1 => Gene::Reaction(rng.gen()),
+            _ => Gene::Receptor(rng.gen()),
+        }
+    }
 }
 
 #[derive(RustcEncodable, RustcDecodable)]
