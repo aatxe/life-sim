@@ -1,4 +1,5 @@
 use std::cell::Cell;
+use std::cmp::min;
 use std::collections::HashMap;
 use genome::{Creature, LocusId, LocusValue};
 
@@ -16,6 +17,10 @@ impl ChemoBody {
 
     pub fn get(&mut self, id: Id) -> &Chemical {
         self.chems.entry(id).or_insert(Chemical::new(id))
+    }
+
+    pub fn concnt(&mut self, id: Id) -> u8 { 
+        self.chems.entry(id).or_insert(Chemical::new(id)).concnt()
     }
 
     pub fn gain(&mut self, id: Id, amount: Concentration) -> bool {
@@ -114,7 +119,7 @@ impl Emitter {
                 } else {
                     let output = ((self.threshold - signal) as f32 * modifier) as u8;
                     if !body.lose(self.chemical, output) {
-                        let concnt = body.get(self.chemical).concnt();
+                        let concnt = body.concnt(self.chemical);
                         body.lose(self.chemical, concnt);
                     }
                 }
@@ -153,7 +158,62 @@ impl Reaction {
     }
 
     pub fn step(&self, creature: &mut Creature) {
-        unimplemented!()
+        self.tick.set(self.tick.get() + 1);
+        if self.tick.get() < self.rate { return }
+        self.tick.set(0);
+        match self.kind {
+            ReactionType::Normal(ref a, ref b, ref c, ref d) => {
+                let n = min(creature.chemo_body_mut().concnt(a.id) / a.concnt(),
+                            creature.chemo_body_mut().concnt(b.id) / b.concnt()); 
+                let mut update = |c: &Chemical, add: bool| {
+                    if add {
+                        creature.chemo_body_mut().gain(c.id, n * c.concnt())
+                    } else {
+                        creature.chemo_body_mut().lose(c.id, n * c.concnt())
+                    }
+                };
+                update(a, false);
+                update(b, false);
+                update(c, true);
+                update(d, true);
+            },
+            ReactionType::Fusion(ref a, ref b, ref c) => {
+                let n = min(creature.chemo_body_mut().concnt(a.id) / a.concnt(),
+                            creature.chemo_body_mut().concnt(b.id) / b.concnt()); 
+                let mut update = |c: &Chemical, add: bool| {
+                    if add {
+                        creature.chemo_body_mut().gain(c.id, n * c.concnt())
+                    } else {
+                        creature.chemo_body_mut().lose(c.id, n * c.concnt())
+                    }
+                };       
+                update(a, false);
+                update(b, false);
+                update(c, true);
+            },
+            ReactionType::Decay(ref a) => {
+                let n = creature.chemo_body_mut().concnt(a.id) / a.concnt();
+                creature.chemo_body_mut().lose(a.id, n * a.concnt());
+            },
+            ReactionType::Catalytic(ref a, ref b, ref c) => {
+                let n = min(creature.chemo_body_mut().concnt(a.id) / a.concnt(),
+                            creature.chemo_body_mut().concnt(b.id) / b.concnt()); 
+                let mut update = |c: &Chemical, add: bool| {
+                    if add {
+                        creature.chemo_body_mut().gain(c.id, n * c.concnt())
+                    } else {
+                        creature.chemo_body_mut().lose(c.id, n * c.concnt())
+                    }
+                };
+                update(b, false);
+                update(c, true);
+            },
+            ReactionType::CatalyticBreakdown(ref a, ref b) => {
+                let n = min(creature.chemo_body_mut().concnt(a.id) / a.concnt(),
+                            creature.chemo_body_mut().concnt(b.id) / b.concnt()); 
+                creature.chemo_body_mut().lose(b.id, n * b.concnt());
+            },
+        }
     }
 }
 
@@ -178,7 +238,7 @@ impl Receptor {
     }
 
     pub fn step(&self, creature: &mut Creature) {
-        let val = creature.chemo_body_mut().get(self.chemical).concnt();
+        let val = creature.chemo_body_mut().concnt(self.chemical);
         let r = if self.invert { -1 } else { 1 };
         let output = match self.kind {
             IoType::Analogue => {
