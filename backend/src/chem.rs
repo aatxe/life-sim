@@ -1,11 +1,9 @@
 use std::cell::Cell;
 use std::collections::HashMap;
-use rand::{Rand, Rng};
+use genome::{Creature, LocusId, LocusValue};
 
 pub type Id = u8;
 pub type Concentration = u8;
-pub type LocusId = u8;
-pub type LocusValue = u8;
 
 pub struct ChemoBody {
     chems: HashMap<Id, Chemical>
@@ -40,7 +38,6 @@ impl ChemoBody {
     }
 }
 
-#[derive_Rand]
 #[derive(RustcEncodable, RustcDecodable)]
 pub struct Chemical {
     id: Id,
@@ -56,7 +53,7 @@ impl Chemical {
         Chemical { id: id, concentration: concentration }
     }
 
-    pub fn id(&self) -> Id {
+       pub fn id(&self) -> Id {
         self.id
     }
 
@@ -65,15 +62,12 @@ impl Chemical {
     }
 }
 
-
-#[derive_Rand]
 #[derive(RustcEncodable, RustcDecodable)]
 pub enum IoType {
     Analogue,
     Digital,
 }
 
-#[derive_Rand]
 #[derive(RustcEncodable, RustcDecodable)]
 pub struct Emitter {
     kind: IoType,
@@ -84,6 +78,7 @@ pub struct Emitter {
     threshold: LocusValue,
     clear_after_read: bool,
     invert: bool,
+    tick: Cell<u8>,
 }
 
 impl Emitter {
@@ -91,16 +86,16 @@ impl Emitter {
                threshold: LocusValue, clear_after_read: bool, invert: bool) -> Emitter {
         Emitter { 
             kind: kind, chemical: chemical, rate: rate, gain: gain, locus: locus, 
-            threshold: threshold, clear_after_read: clear_after_read, invert: invert,
+            threshold: threshold, clear_after_read: clear_after_read, invert: invert, 
+            tick: Cell::new(0)
         }
     }
 
-    pub fn step(&self, body: &mut ChemoBody) {
+    pub fn step(&self, creature: &mut Creature) {
         unimplemented!()
     }
 }
 
-#[derive_Rand]
 #[derive(RustcEncodable, RustcDecodable)]
 pub enum ReactionType {
     /// A + B -> C + D
@@ -122,23 +117,16 @@ pub struct Reaction {
     tick: Cell<u8>,
 }
 
-impl Rand for Reaction {
-    fn rand<R: Rng>(rng: &mut R) -> Reaction {
-        Reaction { kind: rng.gen(), rate: rng.gen(), tick: Cell::new(0) }
-    }
-}
-
 impl Reaction {
     pub fn new(kind: ReactionType, rate: u8) -> Reaction {
         Reaction { kind: kind, rate: rate, tick: Cell::new(0) }
     }
 
-    pub fn step(&self, body: &ChemoBody) {
+    pub fn step(&self, creature: &mut Creature) {
         unimplemented!()
     }
 }
 
-#[derive_Rand]
 #[derive(RustcEncodable, RustcDecodable)]
 pub struct Receptor {
     kind: IoType,
@@ -158,7 +146,7 @@ impl Receptor {
         }
     }
 
-    pub fn step(&self, body: &ChemoBody) {
+    pub fn step(&self, creature: &mut Creature) {
         unimplemented!()
     }
 }
