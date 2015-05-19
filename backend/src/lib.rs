@@ -1,6 +1,3 @@
-#![feature(custom_derive, plugin)]
-#![plugin(rand_macros)]
-
 extern crate rand;
 extern crate rustc_serialize;
 

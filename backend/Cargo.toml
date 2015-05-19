@@ -6,8 +6,5 @@ authors = ["Aaron Weiss <aaronweiss74@gmail.com>"]
 [dependencies.rand]
 rand = "*"
 
-[dependencies.rand_macros]
-rand_macros = "*"
-
 [dependencies.rustc-serialize]
 rustc-serialize = "*"
