@@ -1,5 +1,20 @@
-use chem::ConcentrationExt;
 use rand::{Rng, thread_rng};
+
+pub trait ClampExt {
+    fn clamp(&self, lo: Self, hi: Self) -> Self;
+}
+
+impl ClampExt for f32 {
+    fn clamp(&self, lo: f32, hi: f32) -> f32 {
+        if *self > hi {
+            hi
+        } else if *self < lo {
+            lo
+        } else {
+            *self
+        }
+    }
+}
 
 #[derive(Debug, PartialEq)]
 struct Neuron {
