@@ -4,7 +4,7 @@ use std::io::{Error, ErrorKind, Result};
 use std::io::prelude::*;
 use std::path::Path;
 use std::slice::Iter;
-use chem::{ChemoBody, Emitter, Reaction, Receptor};
+use chem::{Chemical, ChemoBody, Emitter, Reaction, Receptor};
 use rustc_serialize::json::{decode, encode};
 
 pub type LocusId = u8;
@@ -39,6 +39,7 @@ impl Creature {
 
 #[derive(RustcEncodable, RustcDecodable)]
 pub enum Gene {
+    InitialState(Chemical),
     Emitter(Emitter),
     Reaction(Reaction),
     Receptor(Receptor),
