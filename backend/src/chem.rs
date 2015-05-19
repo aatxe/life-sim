@@ -161,6 +161,7 @@ impl Reaction {
 pub struct Receptor {
     kind: IoType,
     chemical: Id,
+    locus: LocusId,
     nominal: LocusValue,
     gain: LocusValue,
     threshold: Concentration,
@@ -168,15 +169,24 @@ pub struct Receptor {
 }
 
 impl Receptor {
-    pub fn new(kind: IoType, chemical: Id, nominal: LocusValue, gain: LocusValue,
+    pub fn new(kind: IoType, chemical: Id, locus: LocusId, nominal: LocusValue, gain: LocusValue,
                threshold: Concentration, invert: bool) -> Receptor {
         Receptor {
-            kind: kind, chemical: chemical, nominal: nominal, gain: gain, threshold: threshold,
-            invert: invert
+            kind: kind, chemical: chemical, locus: locus, nominal: nominal, gain: gain,
+            threshold: threshold, invert: invert
         }
     }
 
     pub fn step(&self, creature: &mut Creature) {
-        unimplemented!()
+        let val = creature.chemo_body_mut().get(self.chemical).concnt();
+        let r = if self.invert { -1 } else { 1 };
+        let output = match self.kind {
+            IoType::Analogue => {
+                let modifier = self.gain as f32 / 255.0;
+                self.nominal + (((val - self.threshold) as f32 * modifier) as u8 * r)
+            },
+            IoType::Digital => self.nominal + if val > self.threshold { self.gain } else { 0 } * r
+        };
+        creature.set_locus(self.locus, output);
     }
 }
