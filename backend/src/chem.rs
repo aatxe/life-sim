@@ -14,6 +14,10 @@ impl ChemoBody {
         ChemoBody { chems: HashMap::new() }
     }
 
+    pub fn get(&mut self, id: Id) -> &Chemical {
+        self.chems.entry(id).or_insert(Chemical::new(id))
+    }
+
     pub fn gain(&mut self, id: Id, amount: Concentration) -> bool {
         let val = self.chems.entry(id).or_insert(Chemical::new(id));
         if let Some(new) = val.concnt().checked_add(amount) {
@@ -92,7 +96,33 @@ impl Emitter {
     }
 
     pub fn step(&self, creature: &mut Creature) {
-        unimplemented!()
+        self.tick.set(self.tick.get() + 1);
+        if self.tick.get() < self.rate { return }
+        self.tick.set(0);
+        let signal = if self.invert { 
+            255 - creature.get_locus(self.locus) 
+        } else { 
+            *creature.get_locus(self.locus) 
+        };
+        let mut body = creature.chemo_body_mut();
+        match self.kind {
+            IoType::Analogue => {
+                let modifier = self.gain as f32 / 255.0;
+                if signal >= self.threshold { 
+                    let output = ((signal - self.threshold) as f32 * modifier) as u8;
+                    body.gain(self.chemical, output);
+                } else {
+                    let output = ((self.threshold - signal) as f32 * modifier) as u8;
+                    if !body.lose(self.chemical, output) {
+                        let concnt = body.get(self.chemical).concnt();
+                        body.lose(self.chemical, concnt);
+                    }
+                }
+            },
+            IoType::Digital => {
+                body.gain(self.chemical, if signal >= self.threshold { self.gain } else { 0 });
+            }
+        }
     }
 }
 
