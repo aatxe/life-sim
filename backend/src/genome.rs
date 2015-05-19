@@ -1,41 +1,10 @@
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::{Error, ErrorKind, Result};
 use std::io::prelude::*;
 use std::path::Path;
 use std::slice::Iter;
-use chem::{Chemical, ChemoBody, Emitter, Reaction, Receptor};
+use chem::{Chemical, Emitter, Reaction, Receptor};
 use rustc_serialize::json::{decode, encode};
-
-pub type LocusId = u8;
-pub type LocusValue = u8;
-
-pub struct Creature {
-    loci: HashMap<LocusId, LocusValue>,
-    chem: ChemoBody,
-}
-
-impl Creature {
-    pub fn new() -> Creature {
-        Creature { loci: HashMap::new(), chem: ChemoBody::new() }
-    }
-
-    pub fn get_locus(&mut self, id: LocusId) -> &LocusValue {
-        self.loci.entry(id).or_insert(0)
-    }
-
-    pub fn set_locus(&mut self, id: LocusId, value: LocusValue) {
-        self.loci.insert(id, value);
-    }
-
-    pub fn chemo_body(&self) -> &ChemoBody {
-        &self.chem
-    }
-
-    pub fn chemo_body_mut(&mut self) -> &mut ChemoBody {
-        &mut self.chem
-    }
-}
 
 #[derive(RustcEncodable, RustcDecodable)]
 pub enum Gene {

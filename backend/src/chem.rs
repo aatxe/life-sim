@@ -1,7 +1,7 @@
 use std::cell::Cell;
 use std::cmp::min;
 use std::collections::HashMap;
-use genome::{Creature, LocusId, LocusValue};
+use creature::{Creature, LocusId, LocusValue};
 
 pub type Id = u8;
 pub type Concentration = u8;
@@ -107,7 +107,7 @@ impl Emitter {
         let signal = if self.invert { 
             255 - creature.get_locus(self.locus) 
         } else { 
-            *creature.get_locus(self.locus) 
+            creature.get_locus(self.locus)
         };
         let mut body = creature.chemo_body_mut();
         match self.kind {
@@ -165,7 +165,7 @@ impl Reaction {
             ReactionType::Normal(ref a, ref b, ref c, ref d) => {
                 let n = min(creature.chemo_body_mut().concnt(a.id) / a.concnt(),
                             creature.chemo_body_mut().concnt(b.id) / b.concnt()); 
-                let mut update = |c: &Chemical, add: bool| {
+                let update = |c: &Chemical, add: bool| {
                     if add {
                         creature.chemo_body_mut().gain(c.id, n * c.concnt())
                     } else {
@@ -180,7 +180,7 @@ impl Reaction {
             ReactionType::Fusion(ref a, ref b, ref c) => {
                 let n = min(creature.chemo_body_mut().concnt(a.id) / a.concnt(),
                             creature.chemo_body_mut().concnt(b.id) / b.concnt()); 
-                let mut update = |c: &Chemical, add: bool| {
+                let update = |c: &Chemical, add: bool| {
                     if add {
                         creature.chemo_body_mut().gain(c.id, n * c.concnt())
                     } else {
@@ -198,7 +198,7 @@ impl Reaction {
             ReactionType::Catalytic(ref a, ref b, ref c) => {
                 let n = min(creature.chemo_body_mut().concnt(a.id) / a.concnt(),
                             creature.chemo_body_mut().concnt(b.id) / b.concnt()); 
-                let mut update = |c: &Chemical, add: bool| {
+                let update = |c: &Chemical, add: bool| {
                     if add {
                         creature.chemo_body_mut().gain(c.id, n * c.concnt())
                     } else {
