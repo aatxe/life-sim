@@ -8,4 +8,5 @@ pub mod genome;
 
 pub use brain::*;
 pub use chem::*;
+pub use creature::*;
 pub use genome::*;
