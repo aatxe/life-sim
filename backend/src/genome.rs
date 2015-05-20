@@ -6,7 +6,7 @@ use std::slice::Iter;
 use chem::{Chemical, Emitter, Reaction, Receptor};
 use rustc_serialize::json::{decode, encode};
 
-#[derive(RustcEncodable, RustcDecodable)]
+#[derive(Clone, RustcEncodable, RustcDecodable)]
 pub enum Gene {
     InitialState(Chemical),
     Emitter(Emitter),
@@ -15,7 +15,7 @@ pub enum Gene {
     Brain(usize, usize, Vec<f32>),
 }
 
-#[derive(RustcEncodable, RustcDecodable)]
+#[derive(Clone, RustcEncodable, RustcDecodable)]
 pub struct Genome {
     genes: Vec<Gene>
 }

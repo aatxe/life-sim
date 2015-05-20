@@ -47,7 +47,7 @@ impl ChemoBody {
     }
 }
 
-#[derive(RustcEncodable, RustcDecodable)]
+#[derive(Clone, RustcEncodable, RustcDecodable)]
 pub struct Chemical {
     id: Id,
     concentration: Concentration,
@@ -71,13 +71,13 @@ impl Chemical {
     }
 }
 
-#[derive(RustcEncodable, RustcDecodable)]
+#[derive(Clone, RustcEncodable, RustcDecodable)]
 pub enum IoType {
     Analogue,
     Digital,
 }
 
-#[derive(RustcEncodable, RustcDecodable)]
+#[derive(Clone, RustcEncodable, RustcDecodable)]
 pub struct Emitter {
     kind: IoType,
     chemical: Id,
@@ -131,7 +131,7 @@ impl Emitter {
     }
 }
 
-#[derive(RustcEncodable, RustcDecodable)]
+#[derive(Clone, RustcEncodable, RustcDecodable)]
 pub enum ReactionType {
     /// A + B -> C + D
     Normal(Chemical, Chemical, Chemical, Chemical),
@@ -145,7 +145,7 @@ pub enum ReactionType {
     CatalyticBreakdown(Chemical, Chemical),
 }
 
-#[derive(RustcEncodable, RustcDecodable)]
+#[derive(Clone, RustcEncodable, RustcDecodable)]
 pub struct Reaction {
     kind: ReactionType,
     rate: u8,
@@ -217,7 +217,7 @@ impl Reaction {
     }
 }
 
-#[derive(RustcEncodable, RustcDecodable)]
+#[derive(Clone, RustcEncodable, RustcDecodable)]
 pub struct Receptor {
     kind: IoType,
     chemical: Id,
