@@ -192,7 +192,7 @@ pub enum ReactionType {
 
 impl Rand for ReactionType {
     fn rand<R: Rng>(rng: &mut R) -> ReactionType {
-        let chem = |rng: &mut R| Chemical::with_concentration(rng.gen(), rng.gen_range(0, 17));
+        let chem = |rng: &mut R| Chemical::with_concentration(rng.gen(), rng.gen_range(1, 17));
         match rng.gen_range(0, 5) {
             1 => ReactionType::Normal(chem(rng), chem(rng), chem(rng), chem(rng)),
             2 => ReactionType::Fusion(chem(rng), chem(rng), chem(rng)),
