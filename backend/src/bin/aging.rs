@@ -7,7 +7,7 @@ fn main() {
     let mut creature = Creature::new();
     genome.init(&mut creature);
     let mut age = creature.age();
-    for n in 0 .. 100000 {
+    for n in 0 .. 600 {
         genome.step(&mut creature);
         if creature.age() != age {
             println!("Creature aged from {:?} to {:?} at t = {}.", age, creature.age(), n);
