@@ -313,8 +313,16 @@ impl Receptor {
         let r = if self.invert { -1 } else { 1 };
         let output = match self.kind {
             IoType::Analogue => {
+                let r = r as f32;
                 let modifier = self.gain as f32 / 255.0;
-                self.nominal + (((val - self.threshold) as f32 * modifier) as u8 * r)
+                let value = self.nominal as f32 + (((val - self.threshold) as f32 * modifier) * r);
+                if value > 255.0 {
+                    255
+                } else if value < 0.0 {
+                    0
+                } else {
+                    value as u8
+                }
             },
             IoType::Digital => self.nominal + if val > self.threshold { self.gain } else { 0 } * r
         };
