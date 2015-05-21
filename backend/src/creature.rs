@@ -76,6 +76,7 @@ enum Locus {
     Hunger           = 7,
 }
 
+#[derive(PartialEq)]
 pub enum Age {
     Baby,
     Child,
