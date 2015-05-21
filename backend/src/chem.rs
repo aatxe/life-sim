@@ -231,10 +231,16 @@ impl Reaction {
                 let n = min(body.concnt(a.id) / a.concnt(),
                             body.concnt(b.id) / b.concnt()); 
                 let mut update = |c: &Chemical, add: bool| {
-                    if add {
-                        body.gain(c.id, n * c.concnt())
+                    let larger = n as u16 * c.concnt() as u16;
+                    let value = if larger > 255 {
+                        255
                     } else {
-                        body.lose(c.id, n * c.concnt())
+                        larger as u8
+                    };
+                    if add {
+                        body.gain(c.id, value)
+                    } else {
+                        body.lose(c.id, value)
                     }
                 };
                 update(a, false);
@@ -246,10 +252,16 @@ impl Reaction {
                 let n = min(body.concnt(a.id) / a.concnt(),
                             body.concnt(b.id) / b.concnt());
                 let mut update = |c: &Chemical, add: bool| {
-                    if add {
-                        body.gain(c.id, n * c.concnt())
+                    let larger = n as u16 * c.concnt() as u16;
+                    let value = if larger > 255 {
+                        255
                     } else {
-                        body.lose(c.id, n * c.concnt())
+                        larger as u8
+                    };
+                    if add {
+                        body.gain(c.id, value)
+                    } else {
+                        body.lose(c.id, value)
                     }
                 };
                 update(a, false);
@@ -258,16 +270,28 @@ impl Reaction {
             },
             ReactionType::Decay(ref a) => {
                 let n = body.concnt(a.id) / a.concnt();
-                body.lose(a.id, n * a.concnt());
+                let larger = n as u16 * a.concnt() as u16;
+                let value = if larger > 255 {
+                    255
+                } else {
+                    larger as u8
+                };
+                body.lose(a.id, value);
             },
             ReactionType::Catalytic(ref a, ref b, ref c) => {
                 let n = min(body.concnt(a.id) / a.concnt(),
                             body.concnt(b.id) / b.concnt()); 
                 let mut update = |c: &Chemical, add: bool| {
-                    if add {
-                        body.gain(c.id, n * c.concnt())
+                    let larger = n as u16 * c.concnt() as u16;
+                    let value = if larger > 255 {
+                        255
                     } else {
-                        body.lose(c.id, n * c.concnt())
+                        larger as u8
+                    };
+                    if add {
+                        body.gain(c.id, value)
+                    } else {
+                        body.lose(c.id, value)
                     }
                 };
                 update(b, false);
@@ -276,7 +300,13 @@ impl Reaction {
             ReactionType::CatalyticBreakdown(ref a, ref b) => {
                 let n = min(body.concnt(a.id) / a.concnt(),
                             body.concnt(b.id) / b.concnt()); 
-                body.lose(b.id, n * b.concnt());
+                let larger = n as u16 * b.concnt() as u16;
+                let value = if larger > 255 {
+                    255
+                } else {
+                    larger as u8
+                };
+                body.lose(b.id, value);
             },
         }
     }
@@ -315,7 +345,8 @@ impl Receptor {
             IoType::Analogue => {
                 let r = r as f32;
                 let modifier = self.gain as f32 / 255.0;
-                let value = self.nominal as f32 + (((val - self.threshold) as f32 * modifier) * r);
+                let value = self.nominal as f32 + (((val as f32 - self.threshold as f32) * modifier) 
+                                                    * r);
                 if value > 255.0 {
                     255
                 } else if value < 0.0 {
