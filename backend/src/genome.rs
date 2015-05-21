@@ -99,6 +99,14 @@ impl Genome {
         f.flush()
     }
 
+    pub fn init(&self, creature: &mut Creature) {
+        for gene in self.genes.iter() {
+            if let Gene::InitialState(ref c) = *gene {
+                creature.chemo_body_mut().gain(c.id(), c.concnt());
+            }
+        }
+    }
+
     pub fn step(&self, creature: &mut Creature) {
         for gene in self.genes.iter() {
             match *gene {
