@@ -225,15 +225,16 @@ impl Reaction {
         self.tick.inc();
         if self.tick.val() < self.rate { return }
         self.tick.zero();
+        let mut body = creature.chemo_body_mut();
         match self.kind {
             ReactionType::Normal(ref a, ref b, ref c, ref d) => {
-                let n = min(creature.chemo_body_mut().concnt(a.id) / a.concnt(),
-                            creature.chemo_body_mut().concnt(b.id) / b.concnt()); 
-                let update = |c: &Chemical, add: bool| {
+                let n = min(body.concnt(a.id) / a.concnt(),
+                            body.concnt(b.id) / b.concnt()); 
+                let mut update = |c: &Chemical, add: bool| {
                     if add {
-                        creature.chemo_body_mut().gain(c.id, n * c.concnt())
+                        body.gain(c.id, n * c.concnt())
                     } else {
-                        creature.chemo_body_mut().lose(c.id, n * c.concnt())
+                        body.lose(c.id, n * c.concnt())
                     }
                 };
                 update(a, false);
@@ -242,13 +243,13 @@ impl Reaction {
                 update(d, true);
             },
             ReactionType::Fusion(ref a, ref b, ref c) => {
-                let n = min(creature.chemo_body_mut().concnt(a.id) / a.concnt(),
-                            creature.chemo_body_mut().concnt(b.id) / b.concnt()); 
-                let update = |c: &Chemical, add: bool| {
+                let n = min(body.concnt(a.id) / a.concnt(),
+                            body.concnt(b.id) / b.concnt()); 
+                let mut update = |c: &Chemical, add: bool| {
                     if add {
-                        creature.chemo_body_mut().gain(c.id, n * c.concnt())
+                        body.gain(c.id, n * c.concnt())
                     } else {
-                        creature.chemo_body_mut().lose(c.id, n * c.concnt())
+                        body.lose(c.id, n * c.concnt())
                     }
                 };       
                 update(a, false);
@@ -256,26 +257,26 @@ impl Reaction {
                 update(c, true);
             },
             ReactionType::Decay(ref a) => {
-                let n = creature.chemo_body_mut().concnt(a.id) / a.concnt();
-                creature.chemo_body_mut().lose(a.id, n * a.concnt());
+                let n = body.concnt(a.id) / a.concnt();
+                body.lose(a.id, n * a.concnt());
             },
             ReactionType::Catalytic(ref a, ref b, ref c) => {
-                let n = min(creature.chemo_body_mut().concnt(a.id) / a.concnt(),
-                            creature.chemo_body_mut().concnt(b.id) / b.concnt()); 
-                let update = |c: &Chemical, add: bool| {
+                let n = min(body.concnt(a.id) / a.concnt(),
+                            body.concnt(b.id) / b.concnt()); 
+                let mut update = |c: &Chemical, add: bool| {
                     if add {
-                        creature.chemo_body_mut().gain(c.id, n * c.concnt())
+                        body.gain(c.id, n * c.concnt())
                     } else {
-                        creature.chemo_body_mut().lose(c.id, n * c.concnt())
+                        body.lose(c.id, n * c.concnt())
                     }
                 };
                 update(b, false);
                 update(c, true);
             },
             ReactionType::CatalyticBreakdown(ref a, ref b) => {
-                let n = min(creature.chemo_body_mut().concnt(a.id) / a.concnt(),
-                            creature.chemo_body_mut().concnt(b.id) / b.concnt()); 
-                creature.chemo_body_mut().lose(b.id, n * b.concnt());
+                let n = min(body.concnt(a.id) / a.concnt(),
+                            body.concnt(b.id) / b.concnt()); 
+                body.lose(b.id, n * b.concnt());
             },
         }
     }
