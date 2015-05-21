@@ -41,7 +41,7 @@ impl Genome {
         Genome { genes: genes }
     }
 
-    pub fn mutate(&mut self) {
+    pub fn mutate(mut self) -> Genome {
         let mut rng = thread_rng();
         let val = rng.gen_range(0, self.genes.len() + 1);
         if val == self.genes.len() {
@@ -80,6 +80,7 @@ impl Genome {
                 _ => panic!("Something went wrong: failed to mutate a gene.")
             };
         }
+        self
     }
 
     pub fn load<T: AsRef<Path>>(path: T) -> Result<Genome> {
