@@ -5,10 +5,10 @@ use std::iter::repeat;
 use backend::*;
 
 fn main() {
-    let target = 300;
+    let target = 0;
     let mut fit = Fitness(std::u32::MAX, Genome::new());
     while fit.0 != 0 {
-        fit = evolve(fit.1, 1000, 2000, |ticks: u32, genome| {
+        fit = evolve(fit.1, 1000, 1000, |ticks: u32, genome| {
             Fitness((target as i64 - ticks as i64).abs() as u32, genome)
         });
     }
@@ -18,12 +18,12 @@ fn main() {
 fn evolve<F>(base: Genome, trials: usize, cap: u32, fitness: F) -> Fitness
 where F: Fn(u32, Genome) -> Fitness {
     repeat(base).take(trials).map(|genome| {
-        let genome = genome.mutate();
+        let genome = genome.mutate().mutate().mutate();
         let mut creature = Creature::new();
         genome.init(&mut creature);
         for t in 0 .. cap {
             genome.step(&mut creature);
-            if creature.age() == Age::Child { return fitness(t, genome) }
+            if creature.age() == Age::Baby { return fitness(t, genome) }
         }
         fitness(cap, genome)
     }).min().unwrap()
