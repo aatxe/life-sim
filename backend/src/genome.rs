@@ -45,7 +45,9 @@ impl Genome {
         let mut rng = thread_rng();
         let val = rng.gen_range(0, self.genes.len() + 1);
         if val == self.genes.len() {
-            self.genes.push(rng.gen())
+            self.genes.push(rng.gen());
+        } else if rng.gen_weighted_bool(self.genes.len() as u32) {
+            self.genes.swap_remove(val);
         } else {
             self.genes[val] = match self.genes[val] {
                 Gene::InitialState(ref ch) => if rng.gen() {
