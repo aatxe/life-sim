@@ -2,6 +2,7 @@ use std::cell::Cell;
 use std::cmp::min;
 use std::collections::HashMap;
 use creature::{Creature, LocusId, LocusValue};
+use rand::{Rand, Rng};
 
 pub type Id = u8;
 pub type Concentration = u8;
@@ -53,6 +54,12 @@ pub struct Chemical {
     concentration: Concentration,
 }
 
+impl Rand for Chemical {
+    fn rand<R: Rng>(rng: &mut R) -> Chemical {
+        Chemical::with_concentration(rng.gen(), rng.gen())
+    }
+}
+
 impl Chemical {
     pub fn new(id: Id) -> Chemical {
         Chemical { id: id, concentration: 0 }
@@ -62,7 +69,7 @@ impl Chemical {
         Chemical { id: id, concentration: concentration }
     }
 
-       pub fn id(&self) -> Id {
+    pub fn id(&self) -> Id {
         self.id
     }
 
@@ -77,17 +84,55 @@ pub enum IoType {
     Digital,
 }
 
+impl Rand for IoType {
+    fn rand<R: Rng>(rng: &mut R) -> IoType {
+        if rng.gen() {
+            IoType::Analogue
+        } else {
+            IoType::Digital
+        }
+    }
+}
+
+#[derive(Clone, RustcEncodable, RustcDecodable)]
+pub struct TickCount(Cell<u8>);
+
+impl TickCount {
+    fn new() -> TickCount {
+        TickCount(Cell::new(0))
+    }
+
+    fn inc(&self) {
+        self.0.set(self.0.get() + 1);
+    }
+
+    fn zero(&self) {
+        self.0.set(0);
+    }
+
+    fn val(&self) -> u8 {
+        self.0.get()
+    }
+}
+
 #[derive(Clone, RustcEncodable, RustcDecodable)]
 pub struct Emitter {
-    kind: IoType,
-    chemical: Id,
-    rate: u8,
-    gain: Concentration,
-    locus: LocusId,
-    threshold: LocusValue,
-    clear_after_read: bool,
-    invert: bool,
-    tick: Cell<u8>,
+    pub kind: IoType,
+    pub chemical: Id,
+    pub rate: u8,
+    pub gain: Concentration,
+    pub locus: LocusId,
+    pub threshold: LocusValue,
+    pub clear_after_read: bool,
+    pub invert: bool,
+    pub tick: TickCount,
+}
+
+impl Rand for Emitter {
+    fn rand<R: Rng>(rng: &mut R) -> Emitter {
+        Emitter::new(rng.gen(), rng.gen(), rng.gen(), rng.gen(),
+                     rng.gen(), rng.gen(), rng.gen(), rng.gen())
+    }
 }
 
 impl Emitter {
@@ -96,14 +141,14 @@ impl Emitter {
         Emitter { 
             kind: kind, chemical: chemical, rate: rate, gain: gain, locus: locus, 
             threshold: threshold, clear_after_read: clear_after_read, invert: invert, 
-            tick: Cell::new(0)
+            tick: TickCount::new()
         }
     }
 
     pub fn step(&self, creature: &mut Creature) {
-        self.tick.set(self.tick.get() + 1);
-        if self.tick.get() < self.rate { return }
-        self.tick.set(0);
+        self.tick.inc();
+        if self.tick.val() < self.rate { return }
+        self.tick.zero();
         let signal = if self.invert { 
             255 - creature.get_locus(self.locus) 
         } else { 
@@ -145,22 +190,41 @@ pub enum ReactionType {
     CatalyticBreakdown(Chemical, Chemical),
 }
 
+impl Rand for ReactionType {
+    fn rand<R: Rng>(rng: &mut R) -> ReactionType {
+        let chem = |rng: &mut R| Chemical::with_concentration(rng.gen(), rng.gen_range(0, 17));
+        match rng.gen_range(0, 5) {
+            1 => ReactionType::Normal(chem(rng), chem(rng), chem(rng), chem(rng)),
+            2 => ReactionType::Fusion(chem(rng), chem(rng), chem(rng)),
+            3 => ReactionType::Decay(chem(rng)),
+            4 => ReactionType::Catalytic(chem(rng), chem(rng), chem(rng)),
+            _ => ReactionType::CatalyticBreakdown(chem(rng), chem(rng))
+        }
+    }
+}
+
 #[derive(Clone, RustcEncodable, RustcDecodable)]
 pub struct Reaction {
-    kind: ReactionType,
-    rate: u8,
-    tick: Cell<u8>,
+    pub kind: ReactionType,
+    pub rate: u8,
+    pub tick: TickCount,
+}
+
+impl Rand for Reaction {
+    fn rand<R: Rng>(rng: &mut R) -> Reaction {
+        Reaction::new(rng.gen(), rng.gen())
+    }
 }
 
 impl Reaction {
     pub fn new(kind: ReactionType, rate: u8) -> Reaction {
-        Reaction { kind: kind, rate: rate, tick: Cell::new(0) }
+        Reaction { kind: kind, rate: rate, tick: TickCount::new() }
     }
 
     pub fn step(&self, creature: &mut Creature) {
-        self.tick.set(self.tick.get() + 1);
-        if self.tick.get() < self.rate { return }
-        self.tick.set(0);
+        self.tick.inc();
+        if self.tick.val() < self.rate { return }
+        self.tick.zero();
         match self.kind {
             ReactionType::Normal(ref a, ref b, ref c, ref d) => {
                 let n = min(creature.chemo_body_mut().concnt(a.id) / a.concnt(),
@@ -219,13 +283,19 @@ impl Reaction {
 
 #[derive(Clone, RustcEncodable, RustcDecodable)]
 pub struct Receptor {
-    kind: IoType,
-    chemical: Id,
-    locus: LocusId,
-    nominal: LocusValue,
-    gain: LocusValue,
-    threshold: Concentration,
-    invert: bool
+    pub kind: IoType,
+    pub chemical: Id,
+    pub locus: LocusId,
+    pub nominal: LocusValue,
+    pub gain: LocusValue,
+    pub threshold: Concentration,
+    pub invert: bool
+}
+
+impl Rand for Receptor {
+    fn rand<R: Rng>(rng: &mut R) -> Receptor {
+        Receptor::new(rng.gen(), rng.gen(), rng.gen(), rng.gen(), rng.gen(), rng.gen(), rng.gen())
+    }
 }
 
 impl Receptor {

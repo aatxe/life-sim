@@ -4,6 +4,7 @@ use std::io::prelude::*;
 use std::path::Path;
 use std::slice::Iter;
 use chem::{Chemical, Emitter, Reaction, Receptor};
+use rand::{thread_rng, Rand, Rng};
 use rustc_serialize::json::{decode, encode};
 
 #[derive(Clone, RustcEncodable, RustcDecodable)]
@@ -15,6 +16,17 @@ pub enum Gene {
     Brain(usize, usize, Vec<f32>),
 }
 
+impl Rand for Gene {
+    fn rand<R: Rng>(rng: &mut R) -> Gene {
+        match rng.gen_range(0, 4) {
+            1 => Gene::InitialState(rng.gen()),
+            2 => Gene::Emitter(rng.gen()),
+            3 => Gene::Reaction(rng.gen()),
+            _ => Gene::Receptor(rng.gen()),
+        }
+    }
+}
+
 #[derive(Clone, RustcEncodable, RustcDecodable)]
 pub struct Genome {
     genes: Vec<Gene>
@@ -23,6 +35,47 @@ pub struct Genome {
 impl Genome {
     pub fn new(genes: Vec<Gene>) -> Genome {
         Genome { genes: genes }
+    }
+
+    pub fn mutate(&mut self) {
+        let mut rng = thread_rng();
+        let val = rng.gen_range(0, self.genes.len() + 1);
+        if val == self.genes.len() {
+            self.genes.push(rng.gen())
+        } else {
+            self.genes[val] = match self.genes[val] {
+                Gene::InitialState(ref ch) => if rng.gen() {
+                    Gene::InitialState(Chemical::with_concentration(ch.id(), rng.gen()))
+                } else {
+                    Gene::InitialState(Chemical::with_concentration(rng.gen(), ch.concnt()))
+                },
+                Gene::Emitter(ref e) => Gene::Emitter(match rng.gen_range(0, 8) {
+                    1 => Emitter { kind: rng.gen(), .. e.clone() },
+                    2 => Emitter { chemical: rng.gen(), .. e.clone() },
+                    3 => Emitter { rate: rng.gen(), .. e.clone() },
+                    4 => Emitter { gain: rng.gen(), .. e.clone() },
+                    5 => Emitter { locus: rng.gen(), .. e.clone() },
+                    6 => Emitter { threshold: rng.gen(), .. e.clone() },
+                    7 => Emitter { clear_after_read: rng.gen(), .. e.clone() },
+                    _ => Emitter { invert: rng.gen(), .. e.clone() },
+                }),
+                Gene::Reaction(ref r) => Gene::Reaction(if rng.gen() {
+                    Reaction { kind: rng.gen(), .. r.clone() }
+                } else {
+                    Reaction { rate: rng.gen(), .. r.clone() }
+                }),
+                Gene::Receptor(ref r) => Gene::Receptor(match rng.gen_range(0, 7) {
+                    1 => Receptor { kind: rng.gen(), .. r.clone() },
+                    2 => Receptor { chemical: rng.gen(), .. r.clone() },
+                    3 => Receptor { locus: rng.gen(), .. r.clone() },
+                    4 => Receptor { nominal: rng.gen(), .. r.clone() },
+                    5 => Receptor { gain: rng.gen(), .. r.clone() },
+                    6 => Receptor { threshold: rng.gen(), .. r.clone() },
+                    _ => Receptor { invert: rng.gen(), .. r.clone() },
+                }),
+                _ => panic!("Something went wrong: failed to mutate a gene.")
+            };
+        }
     }
 
     pub fn load<T: AsRef<Path>>(path: T) -> Result<Genome> {
