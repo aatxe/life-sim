@@ -18,6 +18,7 @@ fn main() {
 fn evolve<F>(base: Genome, trials: usize, cap: u32, fitness: F) -> Fitness
 where F: Fn(u32, Genome) -> Fitness {
     repeat(base).take(trials).map(|genome| {
+        let genome = genome.mutate();
         let mut creature = Creature::new();
         genome.init(&mut creature);
         for t in 0 .. cap {
