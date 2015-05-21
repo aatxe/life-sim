@@ -2,8 +2,8 @@ use std::fs::File;
 use std::io::{Error, ErrorKind, Result};
 use std::io::prelude::*;
 use std::path::Path;
-use std::slice::Iter;
 use chem::{Chemical, Emitter, Reaction, Receptor};
+use creature::Creature;
 use rand::{thread_rng, Rand, Rng};
 use rustc_serialize::json::{decode, encode};
 
@@ -95,7 +95,14 @@ impl Genome {
         f.flush()
     }
 
-    pub fn iter(&self) -> Iter<Gene> {
-        self.genes.iter()
+    pub fn step(&self, creature: &mut Creature) {
+        for gene in self.genes.iter() {
+            match *gene {
+                Gene::Emitter(ref e) => e.step(creature),
+                Gene::Reaction(ref r) => r.step(creature),
+                Gene::Receptor(ref r) => r.step(creature),
+                _ => ()
+            }
+        }
     }
 }
