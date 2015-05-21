@@ -244,14 +244,14 @@ impl Reaction {
             },
             ReactionType::Fusion(ref a, ref b, ref c) => {
                 let n = min(body.concnt(a.id) / a.concnt(),
-                            body.concnt(b.id) / b.concnt()); 
+                            body.concnt(b.id) / b.concnt());
                 let mut update = |c: &Chemical, add: bool| {
                     if add {
                         body.gain(c.id, n * c.concnt())
                     } else {
                         body.lose(c.id, n * c.concnt())
                     }
-                };       
+                };
                 update(a, false);
                 update(b, false);
                 update(c, true);
