@@ -324,7 +324,17 @@ impl Receptor {
                     value as u8
                 }
             },
-            IoType::Digital => self.nominal + if val > self.threshold { self.gain } else { 0 } * r
+            IoType::Digital => {
+                let value = if val > self.threshold { self.gain as i16 } else { 0 } * r;
+                let larger = self.nominal as i16 + value;
+                if larger > 255 {
+                    255
+                } else if larger < 0 {
+                    0
+                } else {
+                    larger as u8
+                }
+            }
         };
         creature.set_locus(self.locus, output);
     }
