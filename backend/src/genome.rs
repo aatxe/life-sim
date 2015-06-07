@@ -71,13 +71,13 @@ impl Genome {
                     Reaction { rate: rng.gen(), .. r.clone() }
                 }),
                 Gene::Receptor(ref r) => Gene::Receptor(match rng.gen_range(0, 7) {
-                    1 => Receptor { kind: rng.gen(), .. r.clone() },
-                    2 => Receptor { chemical: rng.gen(), .. r.clone() },
-                    3 => Receptor { locus: rng.gen(), .. r.clone() },
-                    4 => Receptor { nominal: rng.gen(), .. r.clone() },
-                    5 => Receptor { gain: rng.gen(), .. r.clone() },
-                    6 => Receptor { threshold: rng.gen(), .. r.clone() },
-                    _ => Receptor { invert: rng.gen(), .. r.clone() },
+                    1 => Receptor { kind: rng.gen(), .. *r },
+                    2 => Receptor { chemical: rng.gen(), .. *r },
+                    3 => Receptor { locus: rng.gen(), .. *r },
+                    4 => Receptor { nominal: rng.gen(), .. *r },
+                    5 => Receptor { gain: rng.gen(), .. *r },
+                    6 => Receptor { threshold: rng.gen(), .. *r },
+                    _ => Receptor { invert: rng.gen(), .. *r },
                 }),
                 _ => panic!("Something went wrong: failed to mutate a gene.")
             };
