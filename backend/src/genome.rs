@@ -36,7 +36,7 @@ impl Genome {
     pub fn new() -> Genome {
         Genome { genes: Vec::new() }
     }
-    
+
     pub fn from_genes(genes: Vec<Gene>) -> Genome {
         Genome { genes: genes }
     }

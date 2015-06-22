@@ -20,7 +20,7 @@ impl ChemoBody {
         self.chems.entry(id).or_insert(Chemical::new(id))
     }
 
-    pub fn concnt(&mut self, id: Id) -> u8 { 
+    pub fn concnt(&mut self, id: Id) -> u8 {
         self.chems.entry(id).or_insert(Chemical::new(id)).concnt()
     }
 
@@ -138,9 +138,9 @@ impl Rand for Emitter {
 impl Emitter {
     pub fn new(kind: IoType, chemical: Id, rate: u8, gain: Concentration, locus: LocusId,
                threshold: LocusValue, clear_after_read: bool, invert: bool) -> Emitter {
-        Emitter { 
-            kind: kind, chemical: chemical, rate: rate, gain: gain, locus: locus, 
-            threshold: threshold, clear_after_read: clear_after_read, invert: invert, 
+        Emitter {
+            kind: kind, chemical: chemical, rate: rate, gain: gain, locus: locus,
+            threshold: threshold, clear_after_read: clear_after_read, invert: invert,
             tick: TickCount::new()
         }
     }
@@ -149,16 +149,16 @@ impl Emitter {
         self.tick.inc();
         if self.tick.val() < self.rate { return }
         self.tick.zero();
-        let signal = if self.invert { 
-            255 - creature.get_locus(self.locus) 
-        } else { 
+        let signal = if self.invert {
+            255 - creature.get_locus(self.locus)
+        } else {
             creature.get_locus(self.locus)
         };
         let mut body = creature.chemo_body_mut();
         match self.kind {
             IoType::Analogue => {
                 let modifier = self.gain as f32 / 255.0;
-                if signal >= self.threshold { 
+                if signal >= self.threshold {
                     let output = ((signal - self.threshold) as f32 * modifier) as u8;
                     body.gain(self.chemical, output);
                 } else {
@@ -229,7 +229,7 @@ impl Reaction {
         match self.kind {
             ReactionType::Normal(ref a, ref b, ref c, ref d) => {
                 let n = min(body.concnt(a.id) / a.concnt(),
-                            body.concnt(b.id) / b.concnt()); 
+                            body.concnt(b.id) / b.concnt());
                 let mut update = |c: &Chemical, add: bool| {
                     let larger = n as u16 * c.concnt() as u16;
                     let value = if larger > 255 {
@@ -280,7 +280,7 @@ impl Reaction {
             },
             ReactionType::Catalytic(ref a, ref b, ref c) => {
                 let n = min(body.concnt(a.id) / a.concnt(),
-                            body.concnt(b.id) / b.concnt()); 
+                            body.concnt(b.id) / b.concnt());
                 let mut update = |c: &Chemical, add: bool| {
                     let larger = n as u16 * c.concnt() as u16;
                     let value = if larger > 255 {
@@ -299,7 +299,7 @@ impl Reaction {
             },
             ReactionType::CatalyticBreakdown(ref a, ref b) => {
                 let n = min(body.concnt(a.id) / a.concnt(),
-                            body.concnt(b.id) / b.concnt()); 
+                            body.concnt(b.id) / b.concnt());
                 let larger = n as u16 * b.concnt() as u16;
                 let value = if larger > 255 {
                     255
@@ -345,7 +345,7 @@ impl Receptor {
             IoType::Analogue => {
                 let r = r as f32;
                 let modifier = self.gain as f32 / 255.0;
-                let value = self.nominal as f32 + (((val as f32 - self.threshold as f32) * modifier) 
+                let value = self.nominal as f32 + (((val as f32 - self.threshold as f32) * modifier)
                                                     * r);
                 if value > 255.0 {
                     255

@@ -23,8 +23,8 @@ struct Neuron {
 
 impl Neuron {
     pub fn new(input_count: usize) -> Neuron {
-        Neuron { 
-            weights: { 
+        Neuron {
+            weights: {
                 let mut vec = Vec::with_capacity(input_count + 1);
                 let mut rng = thread_rng();
                 for _ in 0 .. input_count + 1 {
@@ -81,7 +81,7 @@ pub struct NeuralNet {
 }
 
 impl NeuralNet {
-    pub fn new(input_count: usize, output_count: usize, hidden_layer_count: usize, 
+    pub fn new(input_count: usize, output_count: usize, hidden_layer_count: usize,
                neurons_per_hidden_layer: usize) -> NeuralNet {
         NeuralNet {
             input_count: input_count,
@@ -90,7 +90,7 @@ impl NeuralNet {
                 if hidden_layer_count > 0 {
                     vec.push(NeuronLayer::new(neurons_per_hidden_layer, input_count));
                     for _ in 0 .. hidden_layer_count - 1 {
-                        vec.push(NeuronLayer::new(neurons_per_hidden_layer, 
+                        vec.push(NeuronLayer::new(neurons_per_hidden_layer,
                                                   neurons_per_hidden_layer))
                     }
                     vec.push(NeuronLayer::new(output_count, neurons_per_hidden_layer))
