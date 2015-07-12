@@ -1,4 +1,5 @@
 language: rust
+sudo: false
 script:
   - cd backend
   - cargo test --verbose
